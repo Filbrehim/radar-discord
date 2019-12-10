@@ -34,14 +34,15 @@ if fork :
 	flog = open(moi+".log","a",buffering=1)
 
 host=os.uname().nodename
-jeu = discord.Game("{0} sur {1}".format(moi,host))
+jeu = discord.Game(f"{moi} sur {host}")
 client = discord.Client()
 
 async def afficher(res,demande,message,channel) :
    if res['score'] :
       print (" ** {s}: {texte}".format(s=res['score'],texte=res['type']),file=flog)
-      await message.channel.send("__{0}__ a un score de **{1}**".format(demande,res['score']))
       await channel.send("__{0}__ a un score de **{1}**".format(demande,res['score']))
+      if message.channel != channel : 
+          await message.channel.send("__{0}__ a un score de **{1}**".format(demande,res['score']))
       for champ in ['type','compact','vendeur'] :
           if champ in res.keys() :
               await channel.send("{0} : **{1}**".format(champ,res[champ])) 
@@ -71,11 +72,13 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+    for_me = False
     if message.author == client.user:
         return
 
     if message.author.bot :
         print('je parle pas au bot ({0.author.name}), ça les instruits !'.format(message),file=flog) 
+        return 
 
     if message.content.startswith('$hello'):
         await message.channel.send('Hello! {0.author.name}'.format(message))
@@ -85,28 +88,41 @@ async def on_message(message):
             print('on a répondu à {0.author.name} sur {0.channel.name}, de la guilde {0.guild.name}'.format(message),file=flog)
             if message.guild.name != "" :
                 await message.channel.send("je suis content d'être sur {0.guild.name} (ID={0.guild.id})".format(message))
+        return 
 
-    if message.content.lower().startswith(moi.lower()+' '):
-        public=True
-        channel_answer = message.channel
-        if type(message.channel) == discord.channel.DMChannel :
-            print('un message pour moi [{0.content}] de {0.author.name}, en privé'.format(message),file=flog)
-            public = False
-        else :
-            print('un message pour moi [{0.content}] de {0.author.name} sur {0.channel.name}'.format(message),file=flog)
-            channel_answer = message.author.dm_channel 
-            if channel_answer == None :
-                 channel_answer = await message.author.create_dm()
-        content = message.content[len(moi)+1:]
-        await message.channel.send('{1.author.name} me demande **{0}**'.format(content,message))
+## message direct ?
+    if type(message.channel) == discord.channel.DMChannel :
+        for demande in message.content.split() :
+            if len(demande) < 7 : continue
+            for res in [ macaddr.chercher(demande), sanwwid.chercher(demande), timestamp.chercher(demande) ] :
+                await afficher(res,demande,message,message.channel) 
+        return 
+
+## on est mentionné ?
+    for mentionne in message.mentions :
+       if not fork :
+           print(f"{mentionne.name} est mentionné")
+       if mentionne.name.lower() == moi.lower() :
+           for_me = True 
+
+    if for_me :
+        public = False 
+        for demande in message.content.split() :
+             if demande == "/public" : public = True
+        print('un message pour moi [{0.content}] de {0.author.name} sur {0.channel.name}'.format(message),file=flog)
+        channel_answer = message.author.dm_channel 
+        if channel_answer == None :
+             channel_answer = await message.author.create_dm()
+        await message.channel.send('{1.author.name} me demande **{0}**'.format(message.content,message))
         async with message.channel.typing() :
-           for demande in content.split() :
-             if len(demande) < 7 : 
-                continue
+           for demande in message.content.split() :
+             if len(demande) < 7 : continue
+             if demande == "/public" : continue
              for res in [ macaddr.chercher(demande), sanwwid.chercher(demande), timestamp.chercher(demande) ] :
-                 if False and public and os.path.isdir(moi+".dir") :
+                 if public and os.path.isdir(moi+".dir") :
                     await webhook(res,demande,message)
                  else : 
                     await afficher(res,demande,message,channel_answer) 
+                    await channel_answer.send('utiliser `/public` pour un affichage public du résultat')
 
 client.run(get_discord_token()) 
