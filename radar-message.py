@@ -5,8 +5,9 @@ import signal
 import os,sys,re
 import discord
 import time,locale
-import evenements
 from jeton import get_discord_token
+sys.path.insert(1,'lib')
+import evenements
 
 
 locale.setlocale(locale.LC_TIME, 'fr_FR.utf8')
@@ -54,6 +55,6 @@ async def on_ready():
 
     await client.close()
 
-client.run(get_discord_token())
+client.run(get_discord_token("radar"))
 
 print("déconnecté")

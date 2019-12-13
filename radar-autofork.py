@@ -2,12 +2,13 @@
 
 import os,sys,re
 import discord
-import macaddr,sanwwid,timestamp
 import time
 from jeton import get_discord_token
+sys.path.insert(1,'lib')
+import macaddr,sanwwid,timestamp
 
-macaddr.ouitodict("oui.txt")
-sanwwid.ouitodict("oui.txt")
+macaddr.ouitodict("lib/oui.txt")
+sanwwid.ouitodict("lib/oui.txt")
 
 moi="radar"
 fork=True
@@ -20,11 +21,13 @@ for a in sys.argv[0:] :
 		print ("pas de fork")
 	if a[0:5] == "user=" : moi=a[5:]
 
+if not os.path.isdir(moi+".dir") : os.mkdir(moi+".dir")
+
 if fork :
 	pid=os.fork()
 	if pid > 0 :
 		print ('démon pour {moi} forké avec le pid {pid}'.format(pid=pid,moi=moi))
-		pidtxt="radar.pid"
+		pidtxt=moi+".pid"
 		fpid=open(pidtxt,"w")
 		print('{pid}'.format(pid=pid),file=fpid)
 		fpid.close()
@@ -38,6 +41,27 @@ if fork :
 host=os.uname().nodename
 jeu = discord.Game(f"{moi} sur {host}")
 client = discord.Client()
+
+async def recherche_radar(message,public) :
+   channel_answer = message.author.dm_channel 
+   if channel_answer == None :
+        channel_answer = await message.author.create_dm()
+   for demande in message.content.split() :
+     if len(demande) < 7 : continue
+     if demande == "/public" : continue
+     for res in [ macaddr.chercher(demande), sanwwid.chercher(demande), timestamp.chercher(demande) ] :
+         if public and os.path.isdir(moi+".dir") :
+            await webhook(res,demande,message)
+         else : 
+            await afficher(res,demande,message,channel_answer) 
+            flood = time.time()
+            if message.author in anti_flood :
+                 if anti_flood[message.author] + 60 < flood :
+                      anti_flood[message.author] = flood
+                      await channel_answer.send('utiliser `/public` pour un affichage public du résultat')
+            else :
+                 anti_flood[message.author] = flood
+                 await channel_answer.send('utiliser `/public` pour un affichage public du résultat')
 
 async def afficher(res,demande,message,channel) :
    if res['score'] :
@@ -70,6 +94,17 @@ async def webhook(res,demande,message) :
 async def on_ready():
     ## print('On se connecte comme {0.user} le {1}'.format(client,time.strftime("%s %A %e %B %Y %T")),file=flog)
     print('On se connecte comme {0.user}'.format(client),file=flog)
+    for server in client.guilds :
+        if not fork :
+            print(f" je suis présent sur {server.name}")
+            preference_dir=moi+".dir/"+str(server.id)+".dir"
+            if not os.path.isdir(preference_dir) :
+                 print(" * création répertoire") 
+                 os.mkdir(preference_dir)
+            if not os.path.isfile(preference_dir+"/preferences.txt")  :
+                 print("   ** sans préférence")
+            for channel in server.text_channels :
+                 print(f"   ** {channel.name} ") 
     await client.change_presence(activity=jeu)
 
 @client.event
@@ -96,8 +131,9 @@ async def on_message(message):
     if type(message.channel) == discord.channel.DMChannel :
         for demande in message.content.split() :
             if len(demande) < 7 : continue
-            for res in [ macaddr.chercher(demande), sanwwid.chercher(demande), timestamp.chercher(demande) ] :
-                await afficher(res,demande,message,message.channel) 
+            if moi == "radar" :
+                for res in [ macaddr.chercher(demande), sanwwid.chercher(demande), timestamp.chercher(demande) ] :
+                    await afficher(res,demande,message,message.channel) 
         return 
 
 ## on est mentionné ?
@@ -112,26 +148,9 @@ async def on_message(message):
         for demande in message.content.split() :
              if demande == "/public" : public = True
         print('un message pour moi [{0.content}] de {0.author.name} sur {0.channel.name}'.format(message),file=flog)
-        channel_answer = message.author.dm_channel 
-        if channel_answer == None :
-             channel_answer = await message.author.create_dm()
         await message.channel.send('{1.author.name} me demande **{0}**'.format(message.content,message))
-        async with message.channel.typing() :
-           for demande in message.content.split() :
-             if len(demande) < 7 : continue
-             if demande == "/public" : continue
-             for res in [ macaddr.chercher(demande), sanwwid.chercher(demande), timestamp.chercher(demande) ] :
-                 if public and os.path.isdir(moi+".dir") :
-                    await webhook(res,demande,message)
-                 else : 
-                    await afficher(res,demande,message,channel_answer) 
-                    flood = time.time()
-                    if message.author in anti_flood :
-                         if anti_flood[message.author] + 60 < flood :
-                              anti_flood[message.author] = flood
-                              await channel_answer.send('utiliser `/public` pour un affichage public du résultat')
-                    else :
-                         anti_flood[message.author] = flood
-                         await channel_answer.send('utiliser `/public` pour un affichage public du résultat')
+        if moi == "radar" :
+            async with message.channel.typing() :
+                await recherche_radar(message,public) 
 
-client.run(get_discord_token()) 
+client.run(get_discord_token(moi)) 
