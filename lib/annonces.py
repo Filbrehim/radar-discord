@@ -20,13 +20,20 @@ class annonce :
        if not existe :
            self.annoncer = False 
            if not fork :
-               print(f"pas de fichier ${chemin}") 
+               print(f"pas de fichier {chemin}") 
        else :
            self.annoncer = True
            self.chemin = chemin
            pref_f = open(chemin,"rb") 
            self.prefs = pickle.load(pref_f)
            pref_f.close()
+
+    def set_preference(self,fork,p) :
+       """fixe les preferences"""
+       chemin = self.annonceur + ".dir/" + str(self.serveur) + ".dir/preference.pkl" 
+       pref_f = open(chemin,"wb") 
+       pickle.dump(p,pref_f)
+       pref_f.close()
 
     def apropos(self) :
         """donne la version"""

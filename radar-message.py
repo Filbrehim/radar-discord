@@ -7,16 +7,21 @@ import discord
 import time,locale
 from jeton import get_discord_token
 sys.path.insert(1,'lib')
-import evenements
+import evenements,annonces
 
 
 locale.setlocale(locale.LC_TIME, 'fr_FR.utf8')
 host=os.uname().nodename
-moi=sys.argv[0].split(".")[1][1:]
+moi="radar"
+for a in sys.argv[0:] :
+    if a[0:5] == "user=" : moi=a[5:]
+
 jeu = discord.Game("{0}  sur {1}".format(moi,host))
 client = discord.Client()
 ficevent="evenements.csv"
 rpevent = []
+annonce = annonces.annonce() 
+annonce.annonceur = moi 
 
 with open (ficevent) as csvfile :
     evtreader = csv.reader(csvfile,delimiter='|') 
@@ -45,16 +50,19 @@ async def on_ready():
     print('On se connecte comme {0.user}'.format(client))
     await client.change_presence(activity=jeu)
     for server in client.guilds :
+        annonce.serveur = server.id
         print (f"{server.name} a pour ID {server.id}")
-        if server.name == "Memory Echo" :
+        annonce.get_preference(False)
+        if annonce.annoncer :
+            print ("preference trouvées : le canal d'annonce est {0}".format(annonce.prefs["canal_n"]))
             for channel in server.channels :
-                if channel.name == "affiches" :
+                if channel.name == annonce.prefs["canal_n"] :
                     await effacer_anciens_message(channel)
                     await channel.send("Et maintenant, quelques informations ... ")
                     await afficher_event(channel)
 
     await client.close()
 
-client.run(get_discord_token("radar"))
+client.run(get_discord_token(moi))
 
 print("déconnecté")

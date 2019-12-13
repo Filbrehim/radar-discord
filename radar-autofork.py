@@ -5,7 +5,7 @@ import discord
 import time
 from jeton import get_discord_token
 sys.path.insert(1,'lib')
-import macaddr,sanwwid,timestamp
+import macaddr,sanwwid,timestamp,annonces
 
 macaddr.ouitodict("lib/oui.txt")
 sanwwid.ouitodict("lib/oui.txt")
@@ -20,6 +20,9 @@ for a in sys.argv[0:] :
 		fork = False
 		print ("pas de fork")
 	if a[0:5] == "user=" : moi=a[5:]
+
+annonce = annonces.annonce()
+annonce.annonceur = moi
 
 if not os.path.isdir(moi+".dir") : os.mkdir(moi+".dir")
 
@@ -41,6 +44,15 @@ if fork :
 host=os.uname().nodename
 jeu = discord.Game(f"{moi} sur {host}")
 client = discord.Client()
+
+async def annoncer_ici(message,public) :
+   if annonce.prefs == 0 :
+      annonce.prefs = dict()
+   annonce.prefs["canal_n"] = message.channel.name
+   annonce.prefs["canal_i"] = message.channel.id
+   annonce.prefs["quand"] = time.time()
+   annonce.prefs["qui"] = message.author.name
+   annonce.set_preference(fork,annonce.prefs) 
 
 async def recherche_radar(message,public) :
    channel_answer = message.author.dm_channel 
@@ -135,7 +147,10 @@ async def on_message(message):
                 for res in [ macaddr.chercher(demande), sanwwid.chercher(demande), timestamp.chercher(demande) ] :
                     await afficher(res,demande,message,message.channel) 
         return 
-
+    else :
+        annonce.canal = message.channel
+        annonce.serveur =  annonce.canal.guild.id
+        annonce.get_preference(fork)
 ## on est mentionné ?
     for mentionne in message.mentions :
        if not fork :
@@ -152,5 +167,11 @@ async def on_message(message):
         if moi == "radar" :
             async with message.channel.typing() :
                 await recherche_radar(message,public) 
+
+        if moi == "frezza" :
+            for demande in message.content.split() :
+                if demande == "annoncer_ici" :
+                    await annoncer_ici(message,fork)
+                    await message.channel.send(f"{message.author.name} a choisi {message.channel.name} comme canal d'annonce")
 
 client.run(get_discord_token(moi)) 
