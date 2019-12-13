@@ -3,6 +3,7 @@
 import os,sys,re
 import discord
 import macaddr,sanwwid,timestamp
+import time
 from jeton import get_discord_token
 
 macaddr.ouitodict("oui.txt")
@@ -11,6 +12,7 @@ sanwwid.ouitodict("oui.txt")
 moi="radar"
 fork=True
 flog=sys.stdout
+anti_flood = dict() 
 
 for a in sys.argv[0:] :
 	if a == "tty" : 
@@ -123,6 +125,13 @@ async def on_message(message):
                     await webhook(res,demande,message)
                  else : 
                     await afficher(res,demande,message,channel_answer) 
-                    await channel_answer.send('utiliser `/public` pour un affichage public du résultat')
+                    flood = time.time()
+                    if message.author in anti_flood :
+                         if anti_flood[message.author] + 60 < flood :
+                              anti_flood[message.author] = flood
+                              await channel_answer.send('utiliser `/public` pour un affichage public du résultat')
+                    else :
+                         anti_flood[message.author] = flood
+                         await channel_answer.send('utiliser `/public` pour un affichage public du résultat')
 
 client.run(get_discord_token()) 
