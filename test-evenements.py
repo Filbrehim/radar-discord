@@ -2,9 +2,10 @@
 # -*- coding: UTF-8 -*-
 
 ## 
-import evenements
 import os,tempfile,time ,sys,stat
 import locale
+sys.path.insert(1,'lib')
+import evenements
 import timestamp
 locale.setlocale(locale.LC_TIME, 'fr_FR.utf8')
 
