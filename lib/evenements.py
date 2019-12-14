@@ -9,7 +9,6 @@ import pickle
 """Module event """
 class event :
     annonceur = "test"
-    serveur = "event-de-test"
 
     def legacy_all_event(self)  :
         event = dict()
@@ -20,22 +19,20 @@ class event :
         return event ;
 
     def scan_all_event(self) :
-       racine = self.annonceur+".dir/"+self.serveur+".dir" 
+       racine = self.annonceur+".dir"
        if not os.path.isdir(racine) : return None
        event = dict() 
        for f in os.listdir(racine) :
           if f.startswith("evt-") :
               with open(racine+"/"+f,'rb') as f2 :
-                 event[f[4:14]]=pickle.load(f2)
+                 event[f]=pickle.load(f2)
                  f2.close()
 
        return event
     
-    def maj_event(self,quand,champ,valeur) :
-       chemin = self.annonceur+".dir/"+self.serveur+".dir/evt-"+str(quand)+".pkl"
+    def maj_event(self,ref,champ,valeur) :
+       chemin = self.annonceur+".dir/"+ref
        tmp_evt=dict()
-       if not os.path.isdir(self.annonceur+".dir/"+self.serveur+".dir") :
-           os.mkdir(self.annonceur+".dir/"+self.serveur+".dir")
        if os.path.isfile(chemin) :
           with open(chemin,'rb') as f :
              tmp_evt = pickle.load(f)
@@ -44,7 +41,6 @@ class event :
        with open(chemin,'wb') as f :
            pickle.dump(tmp_evt,f) 
            f.close()
-
 
     def apropos(self) :
     	"""donne la version"""
