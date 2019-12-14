@@ -7,7 +7,7 @@ import discord
 import time,locale
 from jeton import get_discord_token
 sys.path.insert(1,'lib')
-import evenements,annonces
+import evenements,preferences
 
 
 locale.setlocale(locale.LC_TIME, 'fr_FR.utf8')
@@ -20,7 +20,7 @@ jeu = discord.Game("{0}  sur {1}".format(moi,host))
 client = discord.Client()
 ficevent="evenements.csv"
 rpevent = []
-annonce = annonces.annonce() 
+annonce = preferences.preference()
 annonce.annonceur = moi 
 
 with open (ficevent) as csvfile :

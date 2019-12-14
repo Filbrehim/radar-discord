@@ -4,8 +4,8 @@
 
 import os,pickle
 
-"""Module annonce """
-class annonce :
+"""Module preferences """
+class preference :
     annonceur = "rummeur"
     serveur = 0
     canal = 0 
