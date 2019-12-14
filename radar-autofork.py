@@ -62,7 +62,7 @@ async def annoncer_ici(message,public) :
    preference.prefs["canal_i"] = message.channel.id
    preference.prefs["quand"]   = time.time()
    preference.prefs["qui"]     = message.author.name
-   preference.set_preference(fork,annonce.prefs) 
+   preference.set_preference(fork,preference.prefs) 
 
 async def recherche_radar(message,public) :
    channel_answer = message.author.dm_channel 
@@ -183,12 +183,11 @@ async def on_message(message):
             async with message.channel.typing() :
                 await recherche_radar(message,public) 
 
-        if moi == "frezza" :
-            for demande in message.content.split() :
-                if demande == "!annoncer_ici" :
-                    await annoncer_ici(message,fork)
-                    await message.channel.send(f"{cest_qui} a choisi {message.channel.name} comme canal d'annonce")
         for demande in message.content.split() :
+
+            if demande == "!annoncer_ici" :
+                 await annoncer_ici(message,fork)
+                 await message.channel.send(f"{cest_qui} a choisi {message.channel.name} comme canal d'annonce")
             if demande == "!rgpd" :
                 await message.channel.send('rgpd !? on est procédureux ?')
                 await preferences(message,fork)

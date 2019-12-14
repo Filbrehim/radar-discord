@@ -18,26 +18,24 @@ for a in sys.argv[0:] :
 
 jeu = discord.Game("{0}  sur {1}".format(moi,host))
 client = discord.Client()
-ficevent="evenements.csv"
 rpevent = []
 annonce = preferences.preference()
 annonce.annonceur = moi 
-
-with open (ficevent) as csvfile :
-    evtreader = csv.reader(csvfile,delimiter='|') 
-    for rangee in evtreader :
-        r0 = int(rangee[0])
-        rangee[0] =  time.strftime("%A %e à %H:%M",time.localtime(r0))
-        rpevent.append(rangee)
-    csvfile.close()
+event = evenements.event()
+event.annonceur = moi
+rpevent = event.scan_all_event()
 
 for evt in rpevent :
-	print (f"à {evt[0]} : {evt[1]}")
+	print (f"à {evt} : {rpevent[evt]['titre']}")
 
 async def afficher_event(channel) :
     for evt in rpevent :
-       Emb = discord.Embed(title=evt[1],type="rich",description=evt[2])
-       Emb.add_field(name="quand",value=evt[0])
+       Emb = discord.Embed(title=rpevent[evt]['titre'],type="rich",description=rpevent[evt]['quoi'].strip())
+       Emb.add_field(name="quand",value=time.strftime("%A %e à %Hh",time.localtime(int(evt))))
+       del rpevent[evt]['titre']
+       del rpevent[evt]['quoi']
+       for k in rpevent[evt] : 
+          Emb.add_field(name=k,value=rpevent[evt][k]) 
        await channel.send(embed=Emb)
 
 async def effacer_anciens_message(channel) :
