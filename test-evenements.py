@@ -8,8 +8,10 @@ import sys
 import csv
 import stat
 import locale
+import hashlib
 sys.path.insert(1, 'lib')
 import evenements
+import preferences
 import timestamp
 locale.setlocale(locale.LC_TIME, 'fr_FR.utf8')
 
@@ -32,7 +34,7 @@ print ('<title> test du {0}</title></head><body><li>{0}</li>'.format(time.strfti
 moi="test"
 evt = evenements.event()
 evt.annonceur = moi
-for chemin in [ evt.annonceur+".dir" , evt.annonceur+".dir/"+evt.serveur+".dir" ] :
+for chemin in [ evt.annonceur+".dir"  ] :
     if not os.path.isdir(chemin) : os.mkdir(chemin)
 
 ### VERSION API
@@ -46,23 +48,55 @@ ficevent="evenements.csv"
 with open (ficevent) as csvfile :
     evtreader = csv.reader(csvfile,delimiter='|')
     for rangee in evtreader :
-       r0 = int(rangee[0]) 
+       titre = str(rangee[0]+rangee[1])
+       r0 = "evt-"+hashlib.sha1(titre.encode('utf-8')).hexdigest() 
        evt.maj_event(r0,"titre",rangee[1])
        evt.maj_event(r0,"quoi",rangee[2])
+       evt.maj_event(r0,"_quand_unix",rangee[0])
+       evt.maj_event(r0,"quand",time.strftime("%A %e %H:%M",time.localtime(int(rangee[0]))))
        ## sword : &#9876; : beer : &#127866;
-       if "Croisée" in rangee[1] : evt.maj_event(r0,"type","PVP")
-       if "Orgrimmar" in rangee[1] : evt.maj_event(r0,"type","Roleplay") 
+       if "Hurlevent" in rangee[1] : evt.maj_event(r0,"faction","Alliance")
+       if "Croisée" in rangee[1] : evt.maj_event(r0,"type","\u2694 PVP \u2694")
+       if "Orgrimmar" in rangee[1] : 
+           evt.maj_event(r0,"type","\U0001f37a Rôleplay "+chr(127866)) 
+           evt.maj_event(r0,"faction","Horde")
     csvfile.close()
 
 liste = evt.scan_all_event()
 for k in liste :
    print(k)
-   print("le {0} : {1}".format(time.strftime("%A %e %H:%M",time.localtime(int(k))),liste[k]),file=crf)
+   print("index {0} : {1}".format(k,liste[k]),file=crf)
    del liste[k]['titre']
    del liste[k]['quoi']
-   for k2 in liste[k] : print (f"{k2} : {liste[k][k2]}")
+   ## for k2 in liste[k] : print (f"{k2} : {liste[k][k2]}")
 fin_test("xx")
 
+### PREFERENCES
+pref = preferences.preference()
+print ("<li>version de l'API <tt>preference</tt> : <b>{0}</b></li>".format(pref.apropos()),file=crf  )
+debut_test("préférence","on test les préférences utilisateur")
+pref.annonceur = moi
+tmp_p = pref.get_upref(128)
+print(f"pref pour 128 : {tmp_p}",file=crf)
+quoi='pigeon préféré' 
+if tmp_p == None : tmp_p = dict() 
+if quoi in tmp_p :
+   if tmp_p[quoi] == "Asie" : tmp_p[quoi] = "Afrique"
+   else : tmp_p[quoi] = "Asie"
+   print(f"nouveau {quoi} : {tmp_p[quoi]}",file=crf)
+else :
+   tmp_p[quoi] = "Asie"
+   print(f" pas de {quoi} : Arghhhh ",file=crf)
+
+pref.set_upref(128,tmp_p)
+
+pref.annonceur = "radar" 
+pref.serveur = "570317142294003713"
+pref.get_preference(False) 
+tmp_p = pref.prefs
+print(tmp_p) 
+
+fin_test("xx")
 ### TIMESTAMP
 
 debut_test("timestamp","on déchiffre des timestamp d'unix")
