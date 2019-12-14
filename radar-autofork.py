@@ -139,14 +139,15 @@ async def on_message(message):
         print(f'je parle pas au bot ({message.author.name}), ça les instruits !',file=flog) 
         return 
 
-    cest_qui = message.author.nick 
-    if cest_qui == None : cest_qui = message.author.name
+    cest_qui = message.author.name 
     if message.content.startswith('$hello'):
-        await message.channel.send(f'Hello! {cest_qui}')
         if type(message.channel) == discord.channel.DMChannel :
+            await message.channel.send(f'Hello! {cest_qui}')
             await message.channel.send(f"hum, conversation privée {message.author.name} ?")
             print(f'on a répondu à {message.author.name}, mais en privé',file=flog)
         else :
+            if message.author.nick != None : cest_qui = message.author.nick
+            await message.channel.send(f'Hello! {cest_qui}')
             print('on a répondu à {0.author.nick} sur {0.channel.name}, de la guilde {0.guild.name}'.format(message),file=flog)
             content = "content"
             if moi == "frezza" : content = "contente"
@@ -156,11 +157,32 @@ async def on_message(message):
 
 ## message direct ?
     if type(message.channel) == discord.channel.DMChannel :
+        ## preparation event en cours ?
+        upref = preference.get_upref(message.author.id) 
         for demande in message.content.split() :
+            if demande == "!rgpd" :
+                await message.channel.send("pas la peine d'être grossier !")
+                if upref == None :
+                   await message.channel.send("t'était pas connu de nos services")
+                   upref = { 'rgpd' : time.time() , 'aoublie' : time.time()+180*86400 , 'pigeon préféré' : 'Afrique' }
+                   preference.set_upref(message.author.id,upref)
+                else :
+                   async with message.channel.typing() :
+                      await message.channel.send("tient donc, voyons ça ...")
+                      for k in upref :
+                         if k == "rgpd" : 
+                            await message.channel.send("RGPD mise à jour **{0}**".format(time.strftime("%a %e %B",time.localtime(int(upref[k])))))
+                            continue
+                         if k == "aoublie" : 
+                            await message.channel.send("Rayé de nos listes dés le **{0}**".format(time.strftime("%a %e %B %Y",time.localtime(int(upref[k])))))
+                            continue
+                         await message.channel.send(f"{k} : {upref[k]}")
+                   continue
             if len(demande) < 7 : continue
             if moi == "radar" :
-                for res in [ macaddr.chercher(demande), sanwwid.chercher(demande), timestamp.chercher(demande) ] :
-                    await afficher(res,demande,message,message.channel) 
+                async with message.channel.typing() :
+                    for res in [ macaddr.chercher(demande), sanwwid.chercher(demande), timestamp.chercher(demande) ] :
+                        await afficher(res,demande,message,message.channel) 
         return 
     else :
         preference.canal   = message.channel
