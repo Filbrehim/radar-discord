@@ -12,6 +12,24 @@ class preference :
     annoncer = False 
     chemin = ""
     prefs = 0
+    upref = None
+
+    def get_upref(self,id) :
+       """preference pour un utilisateur"""
+       chemin = self.annonceur +".dir/upref-" + str(id) + ".pkl"
+       if not os.path.isfile(chemin) : return None
+       else :
+          with open(chemin,'rb') as pref_f :
+             self.upref = pickle.load(pref_f)
+             pref_f.close()
+          return self.upref
+
+    def set_upref(self,id,p) :
+        """fixe le preference utilisateur"""
+        chemin = self.annonceur +".dir/upref-" + str(id) + ".pkl"
+        with open(chemin,'wb') as pref_f :
+            pickle.dump(p,pref_f)
+            pref_f.close()
 
     def get_preference(self,fork) :
        """cherche les preferences"""
@@ -37,4 +55,4 @@ class preference :
 
     def apropos(self) :
         """donne la version"""
-        return "1."
+        return "2.&beta; <br/>pref canal et utilisateur"
