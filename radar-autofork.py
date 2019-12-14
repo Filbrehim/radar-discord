@@ -5,7 +5,7 @@ import discord
 import time
 from jeton import get_discord_token
 sys.path.insert(1,'lib')
-import macaddr,sanwwid,timestamp,annonces
+import macaddr,sanwwid,timestamp,preferences
 
 macaddr.ouitodict("lib/oui.txt")
 sanwwid.ouitodict("lib/oui.txt")
@@ -21,10 +21,11 @@ for a in sys.argv[0:] :
 		print ("pas de fork")
 	if a[0:5] == "user=" : moi=a[5:]
 
-annonce = annonces.annonce()
-annonce.annonceur = moi
+preference = preferences.preference()
+preference.annonceur = moi
 
 if not os.path.isdir(moi+".dir") : os.mkdir(moi+".dir")
+if os.path.isfile(moi+".pid") : os.unlink(moi+".pid")
 
 if fork :
 	pid=os.fork()
@@ -45,14 +46,23 @@ host=os.uname().nodename
 jeu = discord.Game(f"{moi} sur {host}")
 client = discord.Client()
 
+async def preferences(message,public) :
+   if type(preference.prefs) is dict :
+      tmp_quand = time.time()
+      tmp_quand_s = time.strftime("à %Hh%m",time.localtime(tmp_quand))
+      if tmp_quand - preference.prefs["quand"] > 86400 :
+          tmp_quand_s = time.strftime("%A %e %B",time.localtime(tmp_quand))
+      await message.channel.send("{0} a choisi de poster sur **{1}** {2}". \
+         format(preference.prefs["qui"],preference.prefs["canal_n"],tmp_quand_s))
+
 async def annoncer_ici(message,public) :
-   if annonce.prefs == 0 :
-      annonce.prefs = dict()
-   annonce.prefs["canal_n"] = message.channel.name
-   annonce.prefs["canal_i"] = message.channel.id
-   annonce.prefs["quand"] = time.time()
-   annonce.prefs["qui"] = message.author.name
-   annonce.set_preference(fork,annonce.prefs) 
+   if preference.prefs == 0 :
+      preference.prefs = dict()
+   preference.prefs["canal_n"] = message.channel.name
+   preference.prefs["canal_i"] = message.channel.id
+   preference.prefs["quand"]   = time.time()
+   preference.prefs["qui"]     = message.author.name
+   preference.set_preference(fork,annonce.prefs) 
 
 async def recherche_radar(message,public) :
    channel_answer = message.author.dm_channel 
@@ -113,8 +123,8 @@ async def on_ready():
             if not os.path.isdir(preference_dir) :
                  print(" * création répertoire") 
                  os.mkdir(preference_dir)
-            if not os.path.isfile(preference_dir+"/preferences.txt")  :
-                 print("   ** sans préférence")
+            if not os.path.isfile(preference_dir+"/preference.pkl")  :
+                 print(f"   ** sans préférence {preference_dir}")
             for channel in server.text_channels :
                  print(f"   ** {channel.name} ") 
     await client.change_presence(activity=jeu)
@@ -126,17 +136,22 @@ async def on_message(message):
         return
 
     if message.author.bot :
-        print('je parle pas au bot ({0.author.name}), ça les instruits !'.format(message),file=flog) 
+        print(f'je parle pas au bot ({message.author.name}), ça les instruits !',file=flog) 
         return 
 
+    cest_qui = message.author.nick 
+    if cest_qui == None : cest_qui = message.author.name
     if message.content.startswith('$hello'):
-        await message.channel.send('Hello! {0.author.name}'.format(message))
+        await message.channel.send(f'Hello! {cest_qui}')
         if type(message.channel) == discord.channel.DMChannel :
-            await message.channel.send("hum, conversation privée {0.author.name} ?".format(message))
+            await message.channel.send(f"hum, conversation privée {message.author.name} ?")
+            print(f'on a répondu à {message.author.name}, mais en privé',file=flog)
         else :
-            print('on a répondu à {0.author.name} sur {0.channel.name}, de la guilde {0.guild.name}'.format(message),file=flog)
-            if message.guild.name != "" :
-                await message.channel.send("je suis content d'être sur {0.guild.name} (ID={0.guild.id})".format(message))
+            print('on a répondu à {0.author.nick} sur {0.channel.name}, de la guilde {0.guild.name}'.format(message),file=flog)
+            content = "content"
+            if moi == "frezza" : content = "contente"
+            await message.channel.send(f"je suis {content} d'être sur {message.guild.name}")
+            await message.channel.send(f"utiliser @{client.user.name} pour m'interpeller") 
         return 
 
 ## message direct ?
@@ -148,9 +163,9 @@ async def on_message(message):
                     await afficher(res,demande,message,message.channel) 
         return 
     else :
-        annonce.canal = message.channel
-        annonce.serveur =  annonce.canal.guild.id
-        annonce.get_preference(fork)
+        preference.canal   = message.channel
+        preference.serveur = preference.canal.guild.id
+        preference.get_preference(fork)
 ## on est mentionné ?
     for mentionne in message.mentions :
        if not fork :
@@ -162,16 +177,20 @@ async def on_message(message):
         public = False 
         for demande in message.content.split() :
              if demande == "/public" : public = True
-        print('un message pour moi [{0.content}] de {0.author.name} sur {0.channel.name}'.format(message),file=flog)
-        await message.channel.send('{1.author.name} me demande **{0}**'.format(message.content,message))
+        print('un message pour moi [{0.content}] de {0.author.nick} sur {0.channel.name}'.format(message),file=flog)
+        await message.channel.send('{1.author.nick} me demande **{0}**'.format(message.content,message))
         if moi == "radar" :
             async with message.channel.typing() :
                 await recherche_radar(message,public) 
 
         if moi == "frezza" :
             for demande in message.content.split() :
-                if demande == "annoncer_ici" :
+                if demande == "!annoncer_ici" :
                     await annoncer_ici(message,fork)
-                    await message.channel.send(f"{message.author.name} a choisi {message.channel.name} comme canal d'annonce")
+                    await message.channel.send(f"{cest_qui} a choisi {message.channel.name} comme canal d'annonce")
+        for demande in message.content.split() :
+            if demande == "!rgpd" :
+                await message.channel.send('rgpd !? on est procédureux ?')
+                await preferences(message,fork)
 
 client.run(get_discord_token(moi)) 

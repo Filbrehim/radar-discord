@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
-## 
-import os,tempfile,time ,sys,stat
+import os
+import tempfile
+import time
+import sys
+import stat
 import locale
-sys.path.insert(1,'lib')
+sys.path.insert(1, 'lib')
 import evenements
 import timestamp
 locale.setlocale(locale.LC_TIME, 'fr_FR.utf8')
