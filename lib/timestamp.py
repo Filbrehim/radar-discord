@@ -21,7 +21,9 @@ def chercher(chainei) :
 		quoi['type']  = "un timestamp de chez unix"
 		tmp_detail = dict() 
 		maintenant = int(time.time()) 
-		chaine_int = int(chainei) 
+		chaine_int = 0
+		if "." in chainei : chaine_int = float(chainei) 
+		else : chaine_int = int(chainei) 
 		if chaine_int < maintenant : 
 			tmp_detail['direction'] = "passé" 
 			tmp_detail['quand'] = "il y a"
@@ -40,7 +42,7 @@ def chercher(chainei) :
 				unite = "minutes"
 			else : 
 				delta0 = int(delta/3600)
-				unit = "heures"
+				unite = "heures"
 		elif delta <   7 * 86400 : 
 			tmp_format = "%A %Hh%M"
 			delta0 = int(delta/86400)
