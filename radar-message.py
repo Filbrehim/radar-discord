@@ -23,23 +23,20 @@ annonce = preferences.preference()
 annonce.annonceur = moi 
 event = evenements.event()
 event.annonceur = moi
-rpevent = event.scan_all_event()
 
-for evt in rpevent :
-	print (f"à {evt} : {rpevent[evt]['titre']}")
-
-async def afficher_event(channel) :
-    for evt in rpevent :
-       Emb = discord.Embed(title=rpevent[evt]['titre'],type="rich",description=rpevent[evt]['quoi'].strip())
+async def afficher_event(channel,rpevent_local) :
+    for evt in rpevent_local :
+       print(rpevent_local[evt])
+       Emb = discord.Embed(title=rpevent_local[evt]['titre'],type="rich",description=rpevent_local[evt]['quoi'].strip())
        Emb.add_field(name="quand",value=time.strftime("%A %e à %Hh",time.localtime(int(evt))))
-       del rpevent[evt]['titre']
-       del rpevent[evt]['quoi']
-       for k in rpevent[evt] : 
-          Emb.add_field(name=k,value=rpevent[evt][k]) 
+       del rpevent_local[evt]['titre']
+       del rpevent_local[evt]['quoi']
+       for k in rpevent_local[evt] : 
+          Emb.add_field(name=k,value=rpevent_local[evt][k]) 
        await channel.send(embed=Emb)
 
 async def effacer_anciens_message(channel) :
-    async for message in channel.history(limit=20) :
+    async for message in channel.history(limit=100) :
         if message.author == client.user :
             await message.delete() 
 
@@ -53,11 +50,13 @@ async def on_ready():
         annonce.get_preference(False)
         if annonce.annoncer :
             print ("preference trouvées : le canal d'annonce est {0}".format(annonce.prefs["canal_n"]))
+            event.serveur = str(server.id)
+            rpevent = event.scan_all_event()
             for channel in server.channels :
                 if channel.name == annonce.prefs["canal_n"] :
                     await effacer_anciens_message(channel)
                     await channel.send("Et maintenant, quelques informations ... ")
-                    await afficher_event(channel)
+                    await afficher_event(channel,rpevent)
 
     await client.close()
 
