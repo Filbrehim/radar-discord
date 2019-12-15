@@ -44,8 +44,7 @@ async def afficher_event(channel,rpevent_local) :
        if 'author' in rpevent_local[evt] :
            Emb.set_author(name=rpevent_local[evt]['author'])
        else :
-           #Emb.set_footer(text="C'est juste une rumeur")
-           Emb.set_footer("C'est juste une rumeur")
+           Emb.set_footer(text="C'est juste une rumeur")
        for k in rpevent_local[evt] : 
           Emb.add_field(name=k,value=rpevent_local[evt][k]) 
        await channel.send(embed=Emb)

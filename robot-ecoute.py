@@ -140,13 +140,15 @@ async def on_message(message):
         return 
 
     cest_qui = message.author.name 
-    if message.content.startswith('$hello'):
+    if not type(message.channel) == discord.channel.DMChannel and message.author.nick != None :
+        cest_qui = message.author.nick
+
+    if message.content.startswith('!hello'):
         if type(message.channel) == discord.channel.DMChannel :
             await message.channel.send(f'Hello! {cest_qui}')
             await message.channel.send(f"hum, conversation privée {message.author.name} ?")
             print(f'on a répondu à {message.author.name}, mais en privé',file=flog)
         else :
-            if message.author.nick != None : cest_qui = message.author.nick
             await message.channel.send(f'Hello! {cest_qui}')
             print('on a répondu à {0.author.nick} sur {0.channel.name}, de la guilde {0.guild.name}'.format(message),file=flog)
             content = "content"
