@@ -6,7 +6,7 @@ import os,pickle
 
 """Module preferences """
 class preference :
-    annonceur = "rummeur"
+    annonceur = "rumeur"
     serveur = 0
     canal = 0 
     annoncer = False 

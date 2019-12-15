@@ -5,7 +5,7 @@ import discord
 import time
 from jeton import get_discord_token
 sys.path.insert(1,'lib')
-import macaddr,sanwwid,timestamp,preferences
+import macaddr,sanwwid,timestamp,preferences,aide
 
 macaddr.ouitodict("lib/oui.txt")
 sanwwid.ouitodict("lib/oui.txt")
@@ -23,6 +23,8 @@ for a in sys.argv[0:] :
 
 preference = preferences.preference()
 preference.annonceur = moi
+aide = aide.aide()
+aide.annonceur = moi
 
 if not os.path.isdir(moi+".dir") : os.mkdir(moi+".dir")
 if os.path.isfile(moi+".pid") : os.unlink(moi+".pid")
@@ -114,7 +116,6 @@ async def webhook(res,demande,message) :
 
 @client.event
 async def on_ready():
-    ## print('On se connecte comme {0.user} le {1}'.format(client,time.strftime("%s %A %e %B %Y %T")),file=flog)
     print('On se connecte comme {0.user}'.format(client),file=flog)
     for server in client.guilds :
         if not fork :
@@ -180,6 +181,9 @@ async def on_message(message):
                             continue
                          await message.channel.send(f"{k} : {upref[k]}")
                    continue
+            if demande == "!help" : demande = "!aide" 
+            if demande[0] == "!" : 
+                if 0 < await aide.rechercher(demande[1:],message.channel) : continue
             if len(demande) < 7 : continue
             if moi == "radar" :
                 async with message.channel.typing() :

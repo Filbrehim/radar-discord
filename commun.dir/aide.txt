@@ -1,0 +1,5 @@
+Je comprend des ordres simples
+
+ * **!rgpd** pour voir les préférences
+ * **!annoncer_ici** pour définir le canal que reçois les annonces
+
