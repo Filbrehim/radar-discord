@@ -12,7 +12,8 @@ class aide :
     async def rechercher(self,text,channel) :
        """fixe les preferences"""
        trouve = 0 
-       for chemin in [ "commun.dir/" + text + ".txt" , self.annonceur + ".dir/" + text + ".txt" ] :
+       for chemin in [ "commun.dir/" + text + ".txt" , 
+                       "commun.dir/" + self.annonceur + "-" + text + ".txt" ] :
           if os.path.isfile(chemin) :
              txt_compose=""
              with open(chemin,'r') as f :

@@ -1,0 +1,3 @@
+
+ * je peux aussi déchiffrer des adresses mac, des wwid ou des timestamp unix.
+

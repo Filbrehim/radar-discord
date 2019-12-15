@@ -1,0 +1,9 @@
+jeton.py
+*.log
+*.pid
+evenements.csv
+Junk
+Archives
+frezza.dir/
+test.dir
+radar.dir
