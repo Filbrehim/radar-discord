@@ -4,7 +4,7 @@ import csv
 import signal
 import os,sys,re
 import discord
-import time,locale,datetime
+import time,locale
 import traceback
 from jeton import get_discord_token
 sys.path.insert(1,'lib')
@@ -25,30 +25,6 @@ annonce.annonceur = moi
 event = evenements.event()
 event.annonceur = moi
 
-
-async def afficher_event(channel,rpevent_local) :
-    for evt in rpevent_local :
-       print(rpevent_local[evt])
-       Emb = discord.Embed(title=rpevent_local[evt]['titre'],
-                           type="rich",
-                           timestamp = datetime.datetime.fromtimestamp(int(rpevent_local[evt]['_quand_unix'])),
-                           description=rpevent_local[evt]['quoi'].strip())
-       del rpevent_local[evt]['titre']
-       del rpevent_local[evt]['quoi']
-       del rpevent_local[evt]['_quand_unix']
-       del rpevent_local[evt]['quand']
-       if 'faction' in rpevent_local[evt] :
-           if rpevent_local[evt]['faction'] == "Horde" : Emb.colour = 0xe74c3c
-           if rpevent_local[evt]['faction'] == "Alliance" : Emb.colour = 0x3498db
-
-       if 'author' in rpevent_local[evt] :
-           Emb.set_author(name=rpevent_local[evt]['author'])
-       else :
-           Emb.set_footer(text="C'est juste une rumeur")
-       for k in rpevent_local[evt] : 
-          Emb.add_field(name=k,value=rpevent_local[evt][k]) 
-       await channel.send(embed=Emb)
-
 async def effacer_anciens_message(channel) :
     async for message in channel.history(limit=100) :
         if message.author == client.user :
@@ -56,7 +32,7 @@ async def effacer_anciens_message(channel) :
 
 @client.event
 async def on_ready():
-    print('On se connecte comme {0.user}'.format(client))
+    print(f'On se connecte comme {client.user} ')
     await client.change_presence(activity=jeu)
     for server in client.guilds :
       try :
@@ -71,7 +47,7 @@ async def on_ready():
                     await effacer_anciens_message(channel)
                     if len(rpevent) > 0 :
                        await channel.send("Et maintenant, quelques informations ... ")
-                       await afficher_event(channel,rpevent)
+                       await event.afficher_event(channel,rpevent)
                     else :
                        await channel.send("Pas de nouvelle, bonne nouvelle!") 
                         

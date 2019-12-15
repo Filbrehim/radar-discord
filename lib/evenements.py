@@ -5,10 +5,35 @@
 import csv
 import os
 import pickle
+import discord
+import datetime
 
 """Module event """
 class event :
     annonceur = "test"
+
+    async def afficher_event(self,channel,rpevent_local) :
+        for evt in rpevent_local :
+           print(rpevent_local[evt])
+           Emb = discord.Embed(title=rpevent_local[evt]['titre'],
+                               type="rich",
+                               timestamp = datetime.datetime.fromtimestamp(int(rpevent_local[evt]['_quand_unix'])),
+                               description=rpevent_local[evt]['quoi'].strip())
+           del rpevent_local[evt]['titre']
+           del rpevent_local[evt]['quoi']
+           del rpevent_local[evt]['_quand_unix']
+           del rpevent_local[evt]['quand']
+           if 'faction' in rpevent_local[evt] :
+               if rpevent_local[evt]['faction'] == "Horde" : Emb.colour = 0xe74c3c
+               if rpevent_local[evt]['faction'] == "Alliance" : Emb.colour = 0x3498db
+    
+           if 'author' in rpevent_local[evt] :
+               Emb.set_author(name=rpevent_local[evt]['author'])
+           else :
+               Emb.set_footer(text="C'est juste une rumeur")
+           for k in rpevent_local[evt] : 
+              Emb.add_field(name=k,value=rpevent_local[evt][k]) 
+           await channel.send(embed=Emb)
 
     def legacy_all_event(self)  :
         event = dict()
