@@ -4,6 +4,8 @@ jeton.py
 evenements.csv
 Junk
 Archives
-frezza.dir/
+frezza.dir
 test.dir
 radar.dir
+**/__pycache__
+**/oui.txt*
