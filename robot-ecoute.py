@@ -137,7 +137,8 @@ async def on_message(message):
         return
 
     if message.author.bot :
-        print(f'je parle pas au bot ({message.author.name}), ça les instruits !',file=flog) 
+        if not fork :
+            print(f'je parle pas au bot ({message.author.name}), ça les instruits !',file=flog) 
         return 
 
     cest_qui = message.author.name 
@@ -206,7 +207,7 @@ async def on_message(message):
         for demande in message.content.split() :
              if demande == "/public" : public = True
         print('un message pour moi [{0.content}] de {0.author.nick} sur {0.channel.name}'.format(message),file=flog)
-        await message.channel.send('{1.author.nick} me demande **{0}**'.format(message.content,message))
+        await message.channel.send(f'{cest_qui} me demande **{message.content}**')
         if moi == "radar" :
             async with message.channel.typing() :
                 await recherche_radar(message,public) 
