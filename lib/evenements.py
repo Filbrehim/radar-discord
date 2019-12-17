@@ -7,6 +7,7 @@ import os
 import pickle
 import discord
 import datetime
+import time 
 
 """Module event """
 class event :
@@ -15,6 +16,7 @@ class event :
     async def afficher_event(self,channel,rpevent_local) :
         for evt in rpevent_local :
            print(rpevent_local[evt])
+           if int(time.time()) + 43200 > int(rpevent_local[evt]['_quand_unix']) : continue
            Emb = discord.Embed(title=rpevent_local[evt]['titre'],
                                type="rich",
                                timestamp = datetime.datetime.fromtimestamp(int(rpevent_local[evt]['_quand_unix'])),
