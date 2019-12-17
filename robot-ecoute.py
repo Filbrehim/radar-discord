@@ -3,14 +3,15 @@
 import os,sys,re
 import discord
 import time
-from jeton import get_discord_token
+from jeton import get_discord_token,get_discord_user
 sys.path.insert(1,'lib')
 import macaddr,sanwwid,timestamp,preferences,aide
 
 macaddr.ouitodict("lib/oui.txt")
 sanwwid.ouitodict("lib/oui.txt")
 
-moi="radar"
+moi=get_discord_user()
+
 fork=True
 flog=sys.stdout
 anti_flood = dict() 

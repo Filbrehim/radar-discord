@@ -6,14 +6,15 @@ import os,sys,re
 import discord
 import time,locale
 import traceback
-from jeton import get_discord_token
+from jeton import get_discord_token,get_discord_user
 sys.path.insert(1,'lib')
 import evenements,preferences
 
 
 locale.setlocale(locale.LC_TIME, 'fr_FR.utf8')
 host=os.uname().nodename
-moi="radar"
+moi=get_discord_user()
+
 for a in sys.argv[0:] :
     if a[0:5] == "user=" : moi=a[5:]
 
