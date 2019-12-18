@@ -150,6 +150,7 @@ async def on_message(message):
         if type(message.channel) == discord.channel.DMChannel :
             await message.channel.send(f'Hello! {cest_qui}')
             await message.channel.send(f"hum, conversation privée {message.author.name} ?")
+            await message.channel.send("moi c'est {0} sur **{1}**".format(moi,os.uname().nodename))
             print(f'on a répondu à {message.author.name}, mais en privé',file=flog)
         else :
             await message.channel.send(f'Hello! {cest_qui}')
