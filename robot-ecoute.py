@@ -169,7 +169,7 @@ async def on_message(message):
             if demande == "!rgpd" :
                 await message.channel.send("pas la peine d'être grossier !")
                 if upref == None :
-                   await message.channel.send("t'était pas connu de nos services")
+                   await message.channel.send("t'étais pas connu de nos servicesi ...")
                    upref = { 'rgpd' : time.time() , 'aoublie' : time.time()+180*86400 , 'pigeon préféré' : 'Afrique' }
                    preference.set_upref(message.author.id,upref)
                 else :
