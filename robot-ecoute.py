@@ -166,12 +166,17 @@ async def on_message(message):
         ## preparation event en cours ?
         upref = preference.get_upref(message.author.id) 
         for demande in message.content.split() :
+            if demande == "!pref" :
+                if upref == None :
+                    upref = { 'rgpd' : time.time() , 'aoublie' : time.time()+180*86400 , 'pigeon préféré' : 'Afrique' }
+                    preference.set_upref(message.author.id,upref)
+                    await message.channel.send("t'étais pas connu de nos services ...")
+                else : demande = "!rgpd"
+				
             if demande == "!rgpd" :
                 await message.channel.send("pas la peine d'être grossier !")
                 if upref == None :
-                   await message.channel.send("t'étais pas connu de nos servicesi ...")
-                   upref = { 'rgpd' : time.time() , 'aoublie' : time.time()+180*86400 , 'pigeon préféré' : 'Afrique' }
-                   preference.set_upref(message.author.id,upref)
+                   await message.channel.send("t'es pas connu de nos services.")
                 else :
                    async with message.channel.typing() :
                       await message.channel.send("tient donc, voyons ça ...")

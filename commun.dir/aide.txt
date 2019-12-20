@@ -1,4 +1,4 @@
 Je comprend des ordres simples
- **!rgpd** pour voir les préférences
+ **!rgpd** pour voir les préférences (sans les changer)
  **!annoncer_ici** pour définir le canal que reçois les annonces
-
+ **!pref** pour fixer vos préférences (actuellement les préférences se limitent à un pigeon d'Afrique ou d'Asie, et en plus on peut pas choisir)
