@@ -23,7 +23,9 @@ def debut_test(titre,texte) :
 def fin_test(texte) :
 	global crf
 	print ('</pre>',file=crf) 
-compterendu="/var/www/html/Discord" 
+
+compterendu=os.environ['HOME']+"/public_html/Discord" 
+
 crf=tempfile.NamedTemporaryFile(dir=compterendu,suffix=".html",prefix="test-unitaire-",delete=False,mode="w")
 
 print ("http://192.168.1.62/Discord/{0}\n".format(os.path.basename(crf.name)))
@@ -35,7 +37,7 @@ moi="test"
 evt = evenements.event()
 evt.annonceur = moi
 for chemin in [ evt.annonceur+".dir"  ] :
-    if not os.path.isdir(chemin) : os.mkdir(chemin)
+	if not os.path.isdir(chemin) : os.mkdir(chemin)
 
 ### VERSION API
 
@@ -43,24 +45,24 @@ print ("<li>version de l'API <tt>evenement</tt> : <b>{0}</b></li>".format(evt.ap
 debut_test("évènements","on liste des évènements")
 #tous = evt.legacy_all_event()
 #for e in tous :
-#   print("le {0} : {1}".format(time.strftime("%A %e %H:%M",time.localtime(int(e))),tous[e]),file=crf)
+#	print("le {0} : {1}".format(time.strftime("%A %e %H:%M",time.localtime(int(e))),tous[e]),file=crf)
 ficevent="evenements.csv"
 with open (ficevent) as csvfile :
-    evtreader = csv.reader(csvfile,delimiter='|')
-    for rangee in evtreader :
-       titre = str(rangee[0]+rangee[1])
-       r0 = "evt-"+hashlib.sha1(titre.encode('utf-8')).hexdigest() 
-       evt.maj_event(r0,"titre",rangee[1])
-       evt.maj_event(r0,"quoi",rangee[2])
-       evt.maj_event(r0,"_quand_unix",rangee[0])
-       evt.maj_event(r0,"quand",time.strftime("%A %e %H:%M",time.localtime(int(rangee[0]))))
-       ## sword : &#9876; : beer : &#127866;
-       if "Hurlevent" in rangee[1] : evt.maj_event(r0,"faction","Alliance")
-       if "Croisée" in rangee[1] : evt.maj_event(r0,"type","\u2694 PVP \u2694")
-       if "Orgrimmar" in rangee[1] : 
-           evt.maj_event(r0,"type","\U0001f37a Rôleplay "+chr(127866)) 
-           evt.maj_event(r0,"faction","Horde")
-    csvfile.close()
+	evtreader = csv.reader(csvfile,delimiter='|')
+	for rangee in evtreader :
+	   titre = str(rangee[0]+rangee[1])
+	   r0 = "evt-"+hashlib.sha1(titre.encode('utf-8')).hexdigest() 
+	   evt.maj_event(r0,"titre",rangee[1])
+	   evt.maj_event(r0,"quoi",rangee[2])
+	   evt.maj_event(r0,"_quand_unix",rangee[0])
+	   evt.maj_event(r0,"quand",time.strftime("%A %e %H:%M",time.localtime(int(rangee[0]))))
+	   ## sword : &#9876; : beer : &#127866;
+	   if "Hurlevent" in rangee[1] : evt.maj_event(r0,"faction","Alliance")
+	   if "Croisée" in rangee[1] : evt.maj_event(r0,"type","\u2694 PVP \u2694")
+	   if "Orgrimmar" in rangee[1] : 
+		   evt.maj_event(r0,"type","\U0001f37a Rôleplay "+chr(127866)) 
+		   evt.maj_event(r0,"faction","Horde")
+	csvfile.close()
 
 liste = evt.scan_all_event()
 for k in liste :
@@ -73,7 +75,7 @@ fin_test("xx")
 
 ### PREFERENCES
 pref = preferences.preference()
-print ("<li>version de l'API <tt>preference</tt> : <b>{0}</b></li>".format(pref.apropos()),file=crf  )
+print ("<li>version de l'API <tt>preference</tt> : <b>{0}</b></li>".format(pref.apropos()),file=crf	 )
 debut_test("préférence","on test les préférences utilisateur")
 pref.annonceur = moi
 tmp_p = pref.get_upref(128)
