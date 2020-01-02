@@ -6,6 +6,7 @@ import time
 from jeton import get_discord_token,get_discord_user
 sys.path.insert(1,'lib')
 import macaddr,sanwwid,timestamp,preferences,aide
+import evenements
 
 macaddr.ouitodict("lib/oui.txt")
 sanwwid.ouitodict("lib/oui.txt")
@@ -45,6 +46,9 @@ if fork :
 	sys.stderr.close()
 	flog = open(moi+".log","a",buffering=1)
 
+rpevent = []
+g_event = evenements.event()
+g_event.annonceur = moi
 host=os.uname().nodename
 jeu = discord.Game(f"{moi} sur {host}")
 client = discord.Client()
@@ -133,7 +137,6 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    for_me = False
     if message.author == client.user:
         return
 
@@ -142,12 +145,15 @@ async def on_message(message):
             print(f'je parle pas au bot ({message.author.name}), ça les instruits !',file=flog) 
         return 
 
-    cest_qui = message.author.name 
-    if not type(message.channel) == discord.channel.DMChannel and message.author.nick != None :
+    for_me = False
+    private_msg = False
+    cest_qui = message.author.name
+    if type(message.channel) == discord.channel.DMChannel : private_msg = True
+    if not private_msg and message.author.nick != None :
         cest_qui = message.author.nick
 
     if message.content.startswith('!hello'):
-        if type(message.channel) == discord.channel.DMChannel :
+        if private_msg :
             await message.channel.send(f'Hello! {cest_qui}')
             await message.channel.send(f"hum, conversation privée {message.author.name} ?")
             await message.channel.send("moi c'est {0} sur **{1}**".format(moi,os.uname().nodename))
@@ -162,7 +168,7 @@ async def on_message(message):
         return 
 
 ## message direct ?
-    if type(message.channel) == discord.channel.DMChannel :
+    if private_msg :
         ## preparation event en cours ?
         upref = preference.get_upref(message.author.id) 
         for demande in message.content.split() :
@@ -189,9 +195,19 @@ async def on_message(message):
                             continue
                          await message.channel.send(f"{k} : {upref[k]}")
                    continue
+            if demande == "!event" :
+                rpevent = g_event.scan_all_event()
+                print(f'{message.author.name} demande des event',file=flog)
+                print('on en a trouvé {}'.format(len(rpevent)),file=flog)
+                if len(rpevent) > 0 :
+                    await message.channel.send("prochainement sur vos écrans : ")
+                    await g_event.afficher_event(message.channel,rpevent)
+                    continue
+				
             if demande == "!help" : demande = "!aide" 
             if demande[0] == "!" : 
                 if 0 < await aide.rechercher(demande[1:],message.channel) : continue
+
             if len(demande) < 7 : continue
             if moi == "radar" :
                 async with message.channel.typing() :
