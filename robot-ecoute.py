@@ -174,10 +174,11 @@ async def on_message(message):
         for demande in message.content.split() :
             if demande == "!pref" :
                 if upref == None :
-                    upref = { 'rgpd' : time.time() , 'aoublie' : time.time()+180*86400 , 'pigeon préféré' : 'Afrique' }
-                    preference.set_upref(message.author.id,upref)
+                    upref = { 'rgpd' : time.time() , 'aoublie' : time.time()+180*86400 , 'pigeon préféré' : 'Afrique' , 'nom' : cest_qui }
                     await message.channel.send("t'étais pas connu de nos services ...")
                 else : demande = "!rgpd"
+                upref['nom'] = cest_qui
+                preference.set_upref(message.author.id,upref)
 				
             if demande == "!rgpd" :
                 await message.channel.send("pas la peine d'être grossier !")
@@ -193,17 +194,24 @@ async def on_message(message):
                          if k == "aoublie" : 
                             await message.channel.send("Rayé de nos listes dés le **{0}**".format(time.strftime("%a %e %B %Y",time.localtime(int(upref[k])))))
                             continue
+                         if k == "annonce_event" : 
+                            await message.channel.send(f"{k} : {upref[k]}")
+                            tmp_ts = timestamp.chercher(str(int(upref[k]))) 
+                            await message.channel.send("annonce d'une event : **{1}** ({0})".\
+                               format(tmp_ts['detail']['quand'],tmp_ts['detail']['relatif']) ) 
+                            continue
                          await message.channel.send(f"{k} : {upref[k]}")
                    continue
+
             if demande == "!event" :
                 rpevent = g_event.scan_all_event()
                 print(f'{message.author.name} demande des event',file=flog)
                 print('on en a trouvé {}'.format(len(rpevent)),file=flog)
                 if len(rpevent) > 0 :
                     await message.channel.send("prochainement sur vos écrans : ")
-                    await g_event.afficher_event(message.channel,rpevent)
+                    await g_event.afficher_event(message.channel,rpevent,flog)
                     continue
-				
+
             if demande == "!help" : demande = "!aide" 
             if demande[0] == "!" : 
                 if 0 < await aide.rechercher(demande[1:],message.channel) : continue
@@ -243,5 +251,14 @@ async def on_message(message):
             if demande == "!rgpd" :
                 await message.channel.send('rgpd !? on est procédureux ?')
                 await preferences(message,fork)
+
+            if demande == "!annonce" and not private_msg :
+                await  message.channel.send(f"{cest_qui}, poursuivons en privé")
+                upref = preference.get_upref(message.author.id)
+                if upref == None  :
+                    upref = { 'rgpd' : time.time() , 'aoublie' : time.time()+180*86400 , 'pigeon préféré' : 'Asie'  }
+                upref['annonce_event'] = time.time() 
+                upref['aoublie'] = upref['annonce_event'] +180*86400
+                preference.set_upref(message.author.id,upref)
 
 client.run(get_discord_token(moi)) 
