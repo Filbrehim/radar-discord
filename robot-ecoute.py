@@ -237,7 +237,7 @@ async def on_message(message):
         public = False 
         for demande in message.content.split() :
              if demande == "/public" : public = True
-        print('un message pour moi [{0.content}] de {0.author.nick} sur {0.channel.name}'.format(message),file=flog)
+        print('un message pour moi [{0.content}] de {cest_qui} sur {0.channel.name}'.format(message),file=flog)
         await message.channel.send(f'{cest_qui} me demande **{message.content}**')
         if moi == "radar" :
             async with message.channel.typing() :
