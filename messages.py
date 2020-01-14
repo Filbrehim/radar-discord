@@ -48,7 +48,7 @@ async def on_ready():
                     await effacer_anciens_message(channel)
                     if len(rpevent) > 0 :
                        await channel.send("Et maintenant, quelques informations ... ")
-                       await event.afficher_event(channel,rpevent,sys.stdout)
+                       await event.afficher_event(channel,rpevent)
                     else :
                        await channel.send("Pas de nouvelle, bonne nouvelle!") 
                         

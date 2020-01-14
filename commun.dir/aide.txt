@@ -3,4 +3,3 @@ Je comprend des ordres simples
  **!annoncer_ici** pour définir le canal qui reçois les annonces
  **!pref** pour fixer vos préférences (actuellement les préférences se limitent à un pigeon d'Afrique ou d'Asie, et en plus on peut pas choisir)
  **!event** (uniquement en privé) donne une liste des futurs évènements
- **!annonce** pour annoncer un event, le dialogue se poursuis en message privé
