@@ -17,6 +17,17 @@ import preferences
 import timestamp
 locale.setlocale(locale.LC_TIME, 'fr_FR.utf8')
 
+def imprimer(p,indent=0) :
+	if type(p) is dict :
+		for k in p :
+			if type(p[k]) is dict : 
+				print(f"{k:17s} =>")
+				imprimer(p[k],indent+1)
+			else : 
+				print(" "*indent*4+f"{k:17s} : {p[k]}")
+	else :
+		pprint(p) 
+	
 def dumper(fichier)  :
 	if not os.path.isfile(fichier) :
 		print (f"{fichier} n'a pas été trouvé")
@@ -24,13 +35,9 @@ def dumper(fichier)  :
 	with open(fichier,'rb') as f :
 		print (f"dump de {fichier}")
 		p = pickle.load(f)
-		if type(p) is dict :
-			for k in p :
-				print(f"{k:17s} : {p[k]}")
-		else :
-			pprint(p) 
-		f.close()
+		imprimer(p) 
 		print("\n") 
+		f.close()
 
 for a in sys.argv[1:] :
 	dumper(a)
