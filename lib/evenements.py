@@ -66,7 +66,7 @@ class event :
     def valider_date(self,tmp_date) :
         j2 = dict()
         t0 = int(time.time())
-        t0 = 86400 * ( int(t0/86400) ) + 21 * 3600
+        t0 = 86400 * ( int(t0/86400) ) + 20 * 3600 + 1800
         tmp_date2 = tmp_date.lower()
         tmp_lg = len(tmp_date2) 
         tmp_compte = 0 
