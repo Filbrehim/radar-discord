@@ -16,14 +16,24 @@ def chercher(chainei) :
 	quoi = dict()
 	quoi['score'] = 0
 	quoi['donne'] = chainei 
-	if tsre.match(chainei) :
+	chaine_int = 0
+	if isinstance(chainei,str) :
+		if tsre.match(chainei) :
+			quoi['score'] = 1
+			quoi['type']  = "un timestamp de chez unix"
+			if "." in chainei : chaine_int = float(chainei) 
+			else : chaine_int = int(chainei) 
+	if isinstance(chainei,int) :
+		chaine_int = chainei
 		quoi['score'] = 1
-		quoi['type']  = "un timestamp de chez unix"
+		quoi['type']  = "un timestamp de chez unix (int)"
+	if isinstance(chainei,float) :
+		chaine_int = chainei
+		quoi['score'] = 1
+		quoi['type']  = "un timestamp de chez unix (float)"
+	if quoi['score'] > 0 :
 		tmp_detail = dict() 
 		maintenant = int(time.time()) 
-		chaine_int = 0
-		if "." in chainei : chaine_int = float(chainei) 
-		else : chaine_int = int(chainei) 
 		if chaine_int < maintenant : 
 			tmp_detail['direction'] = "passé" 
 			tmp_detail['quand'] = "il y a"
@@ -74,4 +84,4 @@ def chercher(chainei) :
 		
 def apropos() :
 	"""donne la version"""
-	return "1.2"
+	return "1.3"

@@ -105,8 +105,11 @@ print(tmp_p)
 fin_test("xx")
 ### TIMESTAMP
 
+print ("<li>version de l'API <tt>timestamp</tt> : <b>{0}</b></li>".format(timestamp.apropos()),file=crf	 )
 debut_test("timestamp","on déchiffre des timestamp d'unix")
 print (timestamp.chercher("1234567890"),file=crf)
+print (timestamp.chercher(1534567890),file=crf)
+print (timestamp.chercher(1734567890.1234),file=crf)
 tmp_ts=timestamp.chercher(str(int(time.time())+3*86400))
 print (tmp_ts,file=crf)
 print ("""
