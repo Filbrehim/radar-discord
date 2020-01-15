@@ -17,14 +17,20 @@ import preferences
 import timestamp
 locale.setlocale(locale.LC_TIME, 'fr_FR.utf8')
 
+connu = { 'aoublie' : 'quand' , 'rgpd' : 'quand' , 'annonce_event' : 'relatif' }
 def imprimer(p,indent=0) :
+	global connu 
 	if type(p) is dict :
 		for k in p :
 			if type(p[k]) is dict : 
 				print(f"{k:17s} =>")
 				imprimer(p[k],indent+1)
 			else : 
-				print(" "*indent*4+f"{k:17s} : {p[k]}")
+				if k in connu :
+					ts = timestamp.chercher(p[k])
+					print(" "*indent*4+f"{k:17s} : {p[k]} -- {ts['detail'][connu[k]]}")
+				else :
+					print(" "*indent*4+f"{k:17s} : {p[k]}")
 	else :
 		pprint(p) 
 	
