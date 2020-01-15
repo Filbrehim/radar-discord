@@ -71,6 +71,10 @@ for k in liste :
    del liste[k]['titre']
    del liste[k]['quoi']
    ## for k2 in liste[k] : print (f"{k2} : {liste[k][k2]}")
+print("<H5>Validation des jours</H5>",file=crf)
+print("<li><b>{}</b> : <tt>{}</tt></li>".format('jeu',evt.valider_date('jeu')),file=crf)
+print("<li><b>{}</b> : <tt>{}</tt></li>".format('darnivar',evt.valider_date('darnivar')),file=crf)
+print("<li><b>{}</b> : <tt>{}</tt></li>".format('m',evt.valider_date('m')),file=crf)
 fin_test("xx")
 
 ### PREFERENCES

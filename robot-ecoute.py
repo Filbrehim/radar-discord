@@ -3,6 +3,7 @@
 import os,sys,re
 import discord
 import time
+from pprint import pprint
 from jeton import get_discord_token,get_discord_user
 sys.path.insert(1,'lib')
 import macaddr,sanwwid,timestamp,preferences,aide
@@ -171,6 +172,18 @@ async def on_message(message):
     if private_msg :
         ## preparation event en cours ?
         upref = preference.get_upref(message.author.id) 
+        ### annonce event en cours ?
+        if 'annonce_event' in upref :
+            pgm_quand = int(upref['annonce_event'])
+            if time.time() - pgm_quand > 3600 :
+                 await message.channel.send("temps imparti pour composer un event dépassé")
+                 if 'event' in upref : del (upref['event'])
+                 del (upref['annonce_event'])
+                 preference.set_upref(message.author.id,upref)
+            else :
+                 await message.channel.send("composition d'event en cours (il reste {} secondes)".format(3600+pgm_quand-int(time.time())))
+                 await g_event.creer_event(message,preference)
+
         for demande in message.content.split() :
             if demande == "!pref" :
                 if upref == None :
@@ -237,7 +250,7 @@ async def on_message(message):
         public = False 
         for demande in message.content.split() :
              if demande == "/public" : public = True
-        print('un message pour moi [{0.content}] de {cest_qui} sur {0.channel.name}'.format(message),file=flog)
+        print('un message pour moi [{0.content}] de {1} sur {0.channel.name}'.format(message,cest_qui),file=flog)
         await message.channel.send(f'{cest_qui} me demande **{message.content}**')
         if moi == "radar" :
             async with message.channel.typing() :
@@ -253,11 +266,16 @@ async def on_message(message):
                 await preferences(message,fork)
 
             if demande == "!annonce" and not private_msg :
-                await  message.channel.send(f"{cest_qui}, poursuivons en privé")
                 upref = preference.get_upref(message.author.id)
                 if upref == None  :
                     upref = { 'rgpd' : time.time() , 'aoublie' : time.time()+180*86400 , 'pigeon préféré' : 'Asie'  }
-                upref['annonce_event'] = time.time() 
+                if 'event' in upref :
+                    await  message.channel.send(f"{cest_qui} il y a déjà un event en cours")
+                    continue
+                await  message.channel.send(f"{cest_qui}, je suppose que vous avez le droit d'annoncer un event")
+                await  message.channel.send(f"{cest_qui}, mais poursuivons en privé")
+                upref['annonce_event'] = int(time.time())
+                upref['event'] = { 'canal original' : message.guild.name , 'par' : cest_qui }
                 upref['aoublie'] = upref['annonce_event'] +180*86400
                 preference.set_upref(message.author.id,upref)
 
