@@ -35,7 +35,7 @@ if os.path.isfile(moi+".pid") : os.unlink(moi+".pid")
 if fork :
 	pid=os.fork()
 	if pid > 0 :
-		print ('démon pour {moi} forké avec le pid {pid}'.format(pid=pid,moi=moi))
+		print (f'démon pour {moi} forké avec le pid {pid}')
 		pidtxt=moi+".pid"
 		fpid=open(pidtxt,"w")
 		print('{pid}'.format(pid=pid),file=fpid)
