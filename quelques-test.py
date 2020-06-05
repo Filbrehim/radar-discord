@@ -133,7 +133,7 @@ print("</body></html>",file=crf)
 
 crf.close()
 os.chmod(crf.name,stat.S_IRWXU|stat.S_IRGRP|stat.S_IROTH)
-os.unlink(compterendu + "/dernier-test.html")
+if os.path.isfile(compterendu + "/dernier-test.html") : os.unlink(compterendu + "/dernier-test.html")
 os.link(crf.name , compterendu + "/dernier-test.html")
 
 print("rm {0}/*".format(compterendu))
