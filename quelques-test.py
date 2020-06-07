@@ -64,7 +64,7 @@ with open (ficevent) as csvfile :
 		   evt.maj_event(r0,"faction","Horde")
 	csvfile.close()
 
-liste = evt.scan_all_event()
+liste = evt.scan_all_event_pour_quoi("auberge")
 for k in liste :
    print(k)
    print("index {0} : {1}".format(k,liste[k]),file=crf)

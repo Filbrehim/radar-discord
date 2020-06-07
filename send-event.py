@@ -27,7 +27,10 @@ def fin_test(texte) :
 compterendu="/var/www/html/Discord" 
 
 crf=tempfile.NamedTemporaryFile(dir=compterendu,suffix=".html",prefix="test-unitaire-",delete=False,mode="w")
+rssf=open(compterendu+"/rss.xml",mode="w")
 
+print ('<rss version="2.0">\n<channel>',file=rssf)
+print ('\t<title>test event</title>\n\t<description>test des events frezza</description>',file=rssf)
 print ('<html> <head> <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/> <link rel="stylesheet" type="text/css" href="/style.css" />',file=crf)
 print ('<title> test du {0}</title></head><body><li>{0}</li>'.format(time.strftime("%A %e %T")),file=crf)
 
@@ -51,6 +54,7 @@ ficevent="evenements.csv"
 with open (ficevent) as csvfile :
         evtreader = csv.reader(csvfile,delimiter='|')
         for rangee in evtreader :
+           print(f'\t\t<item><title>{rangee[1]}</title><description>{rangee[2]}</description></item>',file=rssf)
            titre = str(rangee[0]+rangee[1])
            r0 = "evt-"+hashlib.sha1(titre.encode('utf-8')).hexdigest() 
            evt.maj_event(r0,"titre",rangee[1])
@@ -89,6 +93,8 @@ print("</body></html>",file=crf)
 
 ### traintement fichier
 
+print ('</channel>\n</rss>',file=rssf)
+rssf.close()
 crf.close()
 os.chmod(crf.name,stat.S_IRWXU|stat.S_IRGRP|stat.S_IROTH)
 if os.path.isfile(compterendu + "/dernier-test.html") : os.unlink(compterendu + "/dernier-test.html")
