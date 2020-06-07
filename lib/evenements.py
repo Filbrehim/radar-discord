@@ -133,6 +133,27 @@ class event :
 
        return event
     
+    def scan_all_event(self,quoi) :
+       racine = self.annonceur+".dir"
+       if not os.path.isdir(racine) : return None
+       event = dict() 
+       for f in os.listdir(racine) :
+          if f.startswith("evt-") :
+              with open(racine+"/"+f,'rb') as f2 :
+                 event[f]=pickle.load(f2)
+                 e_tmp=event[f]
+                 f2.close()
+
+              if "_quand_unix" in event[f] :
+                  if int(event[f]["_quand_unix"]) < int(time.time() - 86400)  :
+                      os.unlink(racine+"/"+f)
+              else : ## pas de timestamp, event pas finalisé
+                  del event[f]
+              contenu = e_tmp['titre'] + ' ' + e_tmp['quoi']
+              if contenu.lower().count(quoi.lower()) == 0 :
+                  del event[f]
+       return event
+
     def maj_event(self,ref,champ,valeur) :
        chemin = self.annonceur+".dir/"+ref
        tmp_evt=dict()
