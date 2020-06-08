@@ -35,7 +35,7 @@ if os.path.isfile(moi+".pid") : os.unlink(moi+".pid")
 if fork :
 	pid=os.fork()
 	if pid > 0 :
-		print ('démon pour {moi} forké avec le pid {pid}'.format(pid=pid,moi=moi))
+		print (f'démon pour {moi} forké avec le pid {pid}')
 		pidtxt=moi+".pid"
 		fpid=open(pidtxt,"w")
 		print('{pid}'.format(pid=pid),file=fpid)
@@ -173,7 +173,7 @@ async def on_message(message):
         ## preparation event en cours ?
         upref = preference.get_upref(message.author.id) 
         ### annonce event en cours ?
-        if 'annonce_event' in upref :
+        if upref != None and 'annonce_event' in upref :
             pgm_quand = int(upref['annonce_event'])
             if time.time() - pgm_quand > 3600 :
                  await message.channel.send("temps imparti pour composer un event dépassé")
@@ -223,8 +223,17 @@ async def on_message(message):
                 if len(rpevent) > 0 :
                     await message.channel.send("prochainement sur vos écrans : ")
                     await g_event.afficher_event(message.channel,rpevent,flog)
+                    await message.channel.send("on peut filter avec un mot clef: **?auberge**")
                     continue
 
+            if demande[0] == "?" :
+                rpevent = g_event.scan_all_event_pour_quoi(demande[1:])
+                print(f'{message.author.name} demande des event : {demande}',file=flog)
+                print('on en a trouvé {}'.format(len(rpevent)),file=flog)
+                if len(rpevent) > 0 :
+                    await message.channel.send(f"prochainement sur vos écrans : (**{demande}**)")
+                    await g_event.afficher_event(message.channel,rpevent,flog)
+                    continue
             if demande == "!help" : demande = "!aide" 
             if demande[0] == "!" : 
                 if 0 < await aide.rechercher(demande[1:],message.channel) : continue
