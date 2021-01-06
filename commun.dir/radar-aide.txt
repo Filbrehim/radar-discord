@@ -1,3 +1,4 @@
-les demandes doivent commencer par **@radar** ou m'être envoyé en message direct.
+les demandes peuvent commencer par **@radar** (1) ou m'être envoyé en message direct.
  * je peux aussi déchiffrer des adresses mac, des wwid ou des timestamp unix.
+ (1) mais je réponds pas tous le temps.
 
