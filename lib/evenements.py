@@ -9,6 +9,8 @@ import discord
 import datetime
 import time 
 import sys
+import json
+import hashlib
 sys.path.insert(1,'lib')
 import preferences
 
@@ -85,7 +87,8 @@ class event :
 
     async def afficher_event(self,channel,rpevent_local,flog) :
         for evt in rpevent_local :
-           if int(time.time()) - 7200 > int(rpevent_local[evt]['_quand_unix']) : continue
+           if int(time.time()) - 7200 > int(rpevent_local[evt]['_quand_unix']) \
+              and "uuid" not in rpevent_local[evt] : continue
            print(rpevent_local[evt],file=flog)
            Emb = discord.Embed(title=rpevent_local[evt]['titre'],
                                type="rich",
@@ -94,7 +97,8 @@ class event :
            del rpevent_local[evt]['titre']
            del rpevent_local[evt]['quoi']
            del rpevent_local[evt]['_quand_unix']
-           del rpevent_local[evt]['quand']
+           if "quand" in rpevent_local[evt] : del rpevent_local[evt]['quand']
+           if "uuid" in rpevent_local[evt] : del rpevent_local[evt]['uuid']
            if 'faction' in rpevent_local[evt] :
                if rpevent_local[evt]['faction'] == "Horde" : Emb.colour = 0xe74c3c
                if rpevent_local[evt]['faction'] == "Alliance" : Emb.colour = 0x3498db
@@ -106,7 +110,22 @@ class event :
            for k in rpevent_local[evt] : 
               Emb.add_field(name=k,value=rpevent_local[evt][k]) 
            await channel.send(embed=Emb)
+           
 
+    def alerte(self,fichier) :
+        if os.path.isfile(fichier) :
+            with open(fichier,'r') as jsonf :
+                alerte = json.load(jsonf)
+                if "titre" in alerte :
+                    alerte["evt"] = "evt-"+hashlib.sha1(alerte["titre"].encode('utf-8')).hexdigest()
+                if "evt" in alerte :
+                    chemin = self.annonceur+".dir/"+alerte["evt"]
+                    del alerte["evt"]
+                    with open(chemin,'wb') as f :
+                        pickle.dump(alerte,f) 
+                        f.close()
+                jsonf.close()
+    
     def legacy_all_event(self)  :
         event = dict()
         with open("evenements.csv","r") as eventf :
@@ -126,8 +145,13 @@ class event :
                  f2.close()
 
               if "_quand_unix" in event[f] :
-                  if int(event[f]["_quand_unix"]) < int(time.time() - 86400)  :
-                      os.unlink(racine+"/"+f)
+                  if "forum" in event[f] :
+                      if int(event[f]["_quand_unix"]) < int(time.time() - 86400 * 8 )  :
+                          os.unlink(racine+"/"+f)
+                  else :
+                      if int(event[f]["_quand_unix"]) < int(time.time() - 86400)  :
+                          os.unlink(racine+"/"+f)
+
               else : ## pas de timestamp, event pas finalisé
                   del event[f]
 

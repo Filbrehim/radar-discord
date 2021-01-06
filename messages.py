@@ -14,9 +14,11 @@ import evenements,preferences
 locale.setlocale(locale.LC_TIME, 'fr_FR.utf8')
 host=os.uname().nodename
 moi=get_discord_user()
+alerte="---"
 
 for a in sys.argv[0:] :
     if a[0:5] == "user=" : moi=a[5:]
+    if a[0:7] == "alerte=" : alerte=a[7:]
 
 jeu = discord.Game("{0}  sur {1}".format(moi,host))
 client = discord.Client()
@@ -25,10 +27,12 @@ annonce = preferences.preference()
 annonce.annonceur = moi 
 event = evenements.event()
 event.annonceur = moi
+event.alerte(alerte)
 
 async def effacer_anciens_message(channel) :
     async for message in channel.history(limit=100) :
         if message.author == client.user :
+            ## trier sur embed.get_field(uuid) ?
             await message.delete() 
 
 @client.event
@@ -45,7 +49,8 @@ async def on_ready():
             for channel in server.channels :
                 if channel.name == annonce.prefs["canal_n"] :
                     rpevent = event.scan_all_event()
-                    await effacer_anciens_message(channel)
+                    if alerte == "---" :
+                        await effacer_anciens_message(channel)
                     if len(rpevent) > 0 :
                        await channel.send("Et maintenant, quelques informations ... ")
                        await event.afficher_event(channel,rpevent,sys.stdout)
