@@ -51,7 +51,7 @@ rpevent = []
 g_event = evenements.event()
 g_event.annonceur = moi
 host=os.uname().nodename
-jeu = discord.Game(f"{moi} sur {host}")
+jeu = discord.Game(f"!aide en MP @{moi}")
 client = discord.Client()
 
 async def preferences(message,public) :
@@ -122,7 +122,7 @@ async def webhook(res,demande,message) :
 
 @client.event
 async def on_ready():
-    print('On se connecte comme {0.user}'.format(client),file=flog)
+    print('On se connecte comme {0.user.name}'.format(client),file=flog)
     for server in client.guilds :
         if not fork :
             print(f" je suis présent sur {server.name}")
@@ -161,7 +161,7 @@ async def on_message(message):
             print(f'on a répondu à {message.author.name}, mais en privé',file=flog)
         else :
             await message.channel.send(f'Hello! {cest_qui}')
-            print('on a répondu à {0.author.nick} sur {0.channel.name}, de la guilde {0.guild.name}'.format(message),file=flog)
+            print('on a répondu à {0.author.name} sur {0.channel.name}, de la guilde {0.guild.name}'.format(message),file=flog)
             content = "content"
             if moi == "frezza" : content = "contente"
             await message.channel.send(f"je suis {content} d'être sur {message.guild.name}")
