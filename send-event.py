@@ -24,7 +24,11 @@ def fin_test(texte) :
         global crf
         print ('</pre>',file=crf) 
 
-compterendu="/var/www/html/Discord" 
+cr_possible = { "tirisfal" : "/var/www/html/Discord" ,
+                "dathomir" : "/home_secure/www/html/zartog/Discord" }
+
+compterendu=cr_possible[os.uname().nodename]
+## si uname().nodename n'est pas trouvé, l'erreur est normale.
 
 crf=tempfile.NamedTemporaryFile(dir=compterendu,suffix=".html",prefix="test-unitaire-",delete=False,mode="w")
 rssf=open(compterendu+"/rss.xml",mode="w")
