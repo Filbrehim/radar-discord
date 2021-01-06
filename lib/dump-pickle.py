@@ -17,7 +17,8 @@ import preferences
 import timestamp
 locale.setlocale(locale.LC_TIME, 'fr_FR.utf8')
 
-connu = { 'aoublie' : 'quand' , 'rgpd' : 'quand' , 'annonce_event' : 'relatif' }
+connu = { 'aoublie' : 'quand' , 'rgpd' : 'quand' , 
+	'annonce_event' : 'relatif' , 'timestamp' : 'relatif' , '_quand_unix' : 'relatif'  }
 def imprimer(p,indent=0) :
 	global connu 
 	if type(p) is dict :
