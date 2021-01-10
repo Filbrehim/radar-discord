@@ -89,11 +89,14 @@ class event :
         for evt in rpevent_local :
            if int(time.time()) - 7200 > int(rpevent_local[evt]['_quand_unix']) \
               and "uuid" not in rpevent_local[evt] : continue
-           print(rpevent_local[evt],file=flog)
            Emb = discord.Embed(title=rpevent_local[evt]['titre'],
                                type="rich",
                                timestamp = datetime.datetime.fromtimestamp(int(rpevent_local[evt]['_quand_unix'])),
                                description=rpevent_local[evt]['quoi'].strip())
+           if rpevent_local[evt]['titre'].lower().find('alliance') > 0  :
+               rpevent_local[evt]['faction'] = "Alliance"
+           if rpevent_local[evt]['titre'].lower().find('horde') > 0  :
+               rpevent_local[evt]['faction'] = "Horde"
            del rpevent_local[evt]['titre']
            del rpevent_local[evt]['quoi']
            del rpevent_local[evt]['_quand_unix']
@@ -105,6 +108,9 @@ class event :
     
            if 'author' in rpevent_local[evt] :
                Emb.set_author(name=rpevent_local[evt]['author'])
+           elif 'auteur' in rpevent_local[evt] :
+               Emb.set_author(name=rpevent_local[evt]['auteur'])
+               del rpevent_local[evt]['auteur']
            else :
                Emb.set_footer(text="C'est juste une rumeur")
            for k in rpevent_local[evt] : 
@@ -125,6 +131,7 @@ class event :
                         pickle.dump(alerte,f) 
                         f.close()
                 jsonf.close()
+        return alerte
     
     def legacy_all_event(self)  :
         event = dict()
@@ -133,6 +140,27 @@ class event :
             for ligne in lireevt :
                 event[ligne[0]]=ligne[1]
         return event ;
+
+    def scan_some_alerte(self,alerte) :
+       racine = self.annonceur+".dir"
+       if not os.path.isdir(racine) : return None
+       event = dict()
+       uuid = dict()
+       for a in alerte :
+           a2 = alerte[a]
+           uuid[a2["uuid"]] = a2["titre"]
+       
+       for f in os.listdir(racine) :
+          tmpevt = dict()
+          if f.startswith("evt-") :
+              with open(racine+"/"+f,'rb') as f2 :
+                 tmpevt=pickle.load(f2)
+                 f2.close()
+          if "uuid"         not in tmpevt : continue
+          if "_quand_unix"  not in tmpevt : continue
+          if tmpevt["uuid"] not in uuid   : continue
+          event[f] = tmpevt
+       return event
 
     def scan_all_event(self) :
        racine = self.annonceur+".dir"
@@ -192,4 +220,4 @@ class event :
 
     def apropos(self) :
     	"""donne la version"""
-    	return "2.0"
+    	return "2.1.&beta;"
